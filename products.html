@@ -1,0 +1,80 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <!-- ALl this stuff ignored under Jquery Mobile MUST load into first page -->
+    <meta http-equiv="x-ua-compatible" content="IE=Edge">
+    <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="css/styles.css" rel="stylesheet">
+    <link href="lib/jquery.mobile.min.css" rel="stylesheet">
+    <link href="lib/jquery.mobile.structure.min.css" rel="stylesheet">
+    <link href="lib/jquery.mobile.theme.min.css" rel="stylesheet">
+    <script src="lib/jquery-1.8.2.min.js"></script>
+    <script src="js/storage/memory-store.js"></script>
+    <script src="js/pageLoadInit.js"></script>
+    <script src="lib/jquery.mobile.min.js"></script>
+    <script src="js/products.js"></script>
+  </head>
+<body>
+
+<div data-role='page' id='productsPage'>
+
+    <div data-role='header' id='page-header' data-position='inline'>
+      <h1>Product Information</h1>
+      <div data-role='navbar'>
+        <ul>
+          <li><a href='index.html'   data-icon='home'>Home</a></li>
+          <li><a href='products.html' data-icon='Product'>New Product</a></li>
+        </ul>
+      </div>
+    </div>
+    <div data-role='content'>  <!-- scroll class needed for iScroll to scroll area -->
+      <form name='frmProduct' >
+          <div id='productImage'>
+          <img src='img/nail-polish-red.jpg'>
+          </div>
+          <div data-role='fieldcontain' id='productEntry'>
+            <label for='prodCode'>Product Code</label>
+            <input type='text' name='prodCode' id='prodCode' value=''>
+          </div>
+          <div  id='productInfo' style="display:none">
+            <div id='divProdCode'></div>
+            <div id='divProdDesc'></div>
+            <div id='divProdStock'></div>
+          </div>
+          <div data-role='fieldcontain' id="divBtnSubmit">
+            <input type='button' name='btnSub' value='Go' data-inline='true' id='prodSubmit'>
+          </div>
+        </form>
+    </div><!-- /content -->
+   <div data-role='footer' data-postion='fixed' id='page-footer'>
+        <h3>running on MARPACS</h3>
+    </div><!-- /footer -->
+
+
+<script>
+ //Script specfic to this page to run when it has loaded into the DOM
+ //Has to go here as only BODY or data-role='page' loaded into DOM
+  $(document).bind("pagechange", function(){
+     //apply overrides here to the pagechange event
+    //Cant use this javascript -> document.forms['frmProduct'].elements['prodCode'].value = "";
+    // Use jquery notation to do it (else get js erros)
+     $('#prodCode').val("");
+     $("#productEntry").show();
+     $("#divBtnSubmit").show();
+     $("#productInfo").hide();
+  });
+
+  $( "#prodSubmit" ).bind( "click", function(event, ui) {
+     prodSubmit();
+  });
+</script>
+</div>
+
+<script src="phonegap.js"></script>
+
+
+
+</body>
+
+</html>

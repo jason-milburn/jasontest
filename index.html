@@ -1,0 +1,308 @@
+<!DOCTYPE HTML PUBLIC>
+<html>
+<head>
+    <meta http-equiv="x-ua-compatible" content="IE=Edge">
+    <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="css/styles.css" rel="stylesheet">
+    <link href="lib/jquery.mobile.min.css" rel="stylesheet">
+    <link href="lib/jquery.mobile.structure.min.css" rel="stylesheet">
+    <link href="lib/jquery.mobile.theme.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="lib/jquery.jqplot.min.css" />
+
+    <script src="lib/jquery.min.js"></script>
+    <script src="lib/jquery.ui.min.js"></script>
+    <script src="lib/jquery.jqplot.min.js"></script>
+    <script type="text/javascript" src="lib/plugins/jqplot.canvasTextRenderer.min.js"></script>
+    <script type="text/javascript" src="lib/plugins/jqplot.canvasAxisTickRenderer.min.js"></script>
+    <script type="text/javascript" src="lib/plugins/jqplot.categoryAxisRenderer.min.js"></script>
+    <script type="text/javascript" src="lib/plugins/jqplot.cursor.min.js"></script>
+    <script type="text/javascript" src="lib/plugins/jqplot.highlighter.min.js"></script>
+    <script type="text/javascript" src="lib/plugins/jqplot.bubbleRenderer.min.js"></script>
+    <script src="js/storage/memory-store.js"></script>
+    <script src="js/transformutils.js"></script>
+    <script src="js/pageLoadInit.js"></script>
+    <script src="js/stscan.js"></script>
+    <script src="js/custenq.js"></script>
+    <script src="js/takePicture.js"></script>
+    <script src="js/genorenq.js"></script>
+    <script src="js/storage/blissStorage.js"></script>
+    <script>
+    	$(document).bind('pageinit',function(){
+          //no other pageload etc will fire this - obviously !!
+ 		 //alert( 'This page was just enhanced by jQuery Mobile!' );
+        });
+    </script>
+    <script src="lib/jquery.mobile.min.js"></script>
+<script language='javascript' type='text/javascript'>
+var carousel = null;					//carousel global for touch events
+var currentPanel = 1;					//Start Panel Number
+var numPanels = 9;	//total number of panels
+
+ var transformProp = Modernizr.prefixed('transform');
+
+    function Carousel3D ( el ) {
+		  this.element = el;
+		  this.rotation = 0;
+		  this.panelCount = 0;
+		  this.totalPanelCount = this.element.children.length;
+		  this.theta = 0;
+		  this.isHorizontal = true;
+    }
+
+    Carousel3D.prototype.modify = function() {
+			  var panel, angle, i;
+			  this.panelSize = this.element[ this.isHorizontal ? 'offsetWidth' : 'offsetHeight' ];
+			  this.rotateFn = this.isHorizontal ? 'rotateY' : 'rotateX';
+			  this.theta = 360 / this.panelCount;
+
+			  // do some trig to figure out how big the carousel
+			  // is in 3D space
+			  this.radius = Math.round( ( this.panelSize / 2) / Math.tan( Math.PI / this.panelCount ) );
+			  for ( i = 0; i < this.panelCount; i++ ) {
+				panel = this.element.children[i];
+				angle = this.theta * i;
+				panel.style.opacity = 1;
+				//panel.style.backgroundColor = 'hsla(' + angle + ', 100%, 50%, 0.8)';
+				panel.style.backgroundColor = 'grey';
+				// rotate panel, then push it out in 3D space
+				panel.style[ transformProp ] = this.rotateFn + '(' + angle + 'deg) translateZ(' + this.radius + 'px)';
+			  }
+			  // hide other panels
+			  for (  ; i < this.totalPanelCount; i++ ) {
+				panel = this.element.children[i];
+				panel.style.opacity = 0;
+				panel.style[ transformProp ] = 'none';
+			  }
+			  // adjust rotation so panels are always flat
+			  this.rotation = Math.round( this.rotation / this.theta ) * this.theta;
+			  this.transform();
+    };
+
+    Carousel3D.prototype.transform = function() {
+		  // push the carousel back in 3D space, and rotate it
+		  this.element.style[ transformProp ] = 'translateZ(-' + this.radius + 'px) ' + this.rotateFn + '(' + this.rotation + 'deg)';
+    };
+
+
+
+      var init = function() {
+
+			  carousel = new Carousel3D( document.getElementById('carousel') ),
+				  panelCountInput = 9,
+
+				  onNavButtonClick = function( event ){
+						var increment = parseInt( event.target.getAttribute('data-increment') );
+						if (increment >0)
+						{
+							currentPanel++;
+							if (currentPanel == numPanels+1)
+								currentPanel = 1;
+						}
+						else
+						{
+							currentPanel--;
+							if (currentPanel == 0)
+								currentPanel = numPanels;
+						}
+						carousel.rotation += carousel.theta * increment * -1;
+						carousel.transform();
+				  };
+
+			  // populate on startup
+			  carousel.panelCount = panelCountInput;
+			  carousel.modify();
+
+			  setTimeout( function(){
+				document.body.addClassName('ready');
+			  }, 0);
+
+      };
+
+	$(function(){$("#carousel").live("swipeleft", function(e){
+
+			var increment = 1;
+                        if (increment >0)
+                        {
+                                currentPanel++;
+                                if (currentPanel == numPanels+1)
+                                        currentPanel = 1;
+                        }
+                        else
+                        {
+                                currentPanel--;
+                                if (currentPanel == 0)
+                                        currentPanel = numPanels;
+                        }
+			carousel.rotation += carousel.theta * increment * -1;
+			carousel.transform();
+	});});
+
+	$(function(){$("#carousel").live("swiperight", function(e){
+
+			var increment = -1;
+                        if (increment >0)
+                        {
+                                currentPanel++;
+                                if (currentPanel == numPanels+1)
+                                        currentPanel = 1;
+                        }
+                        else
+                        {
+                                currentPanel--;
+                                if (currentPanel == 0)
+                                        currentPanel = numPanels;
+                        }
+			carousel.rotation += carousel.theta * increment * -1;
+			carousel.transform();
+	});});
+
+	$(function(){$("#carousel").live("tap", function(e){
+		//detect a tap on the div
+		alert('tap Current Panel = ' + currentPanel);
+
+	});});
+
+	$(document).ready(function() {
+		//This doesnt run till page is loaded
+		try {
+			window.addEventListener( 'DOMContentLoaded', init, false);
+                        //alert('runs how ?');
+		  } catch(err) {}
+	});
+
+
+
+
+//	$(document).bind('pageinit'){
+ //		 alert( 'This page was just enhanced by jQuery Mobile!' );
+//	}
+
+</script>
+    <style >
+
+#bkGround {
+/* IE10 Consumer Preview */
+background-image: -ms-radial-gradient(center top, ellipse farthest-side, #FFFFFF 0%, #B6C3EF 100%);
+
+/* Mozilla Firefox */
+background-image: -moz-radial-gradient(center top, ellipse farthest-side, #FFFFFF 0%, #B6C3EF 100%);
+
+/* Opera */
+background-image: -o-radial-gradient(center top, ellipse farthest-side, #FFFFFF 0%, #B6C3EF 100%);
+
+/* Webkit (Safari/Chrome 10) */
+background-image: -webkit-gradient(radial, center top, 0, center top, 487, color-stop(0, #FFFFFF), color-stop(1, #B6C3EF));
+
+/* Webkit (Chrome 11+) */
+background-image: -webkit-radial-gradient(center top, ellipse farthest-side, #FFFFFF 0%, #B6C3EF 100%);
+
+/* W3C Markup, IE10 Release Preview */
+background-image: radial-gradient(ellipse farthest-side at center top, #FFFFFF 0%, #B6C3EF 100%);
+}
+.container {
+      width: 330px;
+      height: 200px;
+      position: relative;
+      margin: 0 auto 40px;
+      //border: 1px solid #CCC;
+      -webkit-perspective: 1100px;
+         -moz-perspective: 1100px;
+           -o-perspective: 1100px;
+              perspective: 1100px;
+    }
+
+
+
+    #carousel {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      -webkit-transform-style: preserve-3d;
+         -moz-transform-style: preserve-3d;
+           -o-transform-style: preserve-3d;
+              transform-style: preserve-3d;
+    }
+
+    .ready #carousel {
+      -webkit-transition: -webkit-transform 1s;
+         -moz-transition: -moz-transform 1s;
+           -o-transition: -o-transform 1s;
+              transition: transform 1s;
+    }
+
+    #carousel.panels-backface-invisible figure {
+      -webkit-backface-visibility: hidden;
+         -moz-backface-visibility: hidden;
+           -o-backface-visibility: hidden;
+              backface-visibility: hidden;
+    }
+
+    #carousel figure {
+      display: block;
+      position: absolute;
+      width: 270px;
+      height: 170px;
+      left: 10px;
+      top: 10px;
+      //border: 2px solid black;
+      line-height: 116px;
+      font-size: 20px;
+      font-weight: bold;
+      color: white;
+      text-align: center;
+    }
+
+    .ready #carousel figure {
+      -webkit-transition: opacity 1s, -webkit-transform 1s;
+         -moz-transition: opacity 1s, -moz-transform 1s;
+           -o-transition: opacity 1s, -o-transform 1s;
+              transition: opacity 1s, transform 1s;
+    }
+
+  </style>
+</head>
+
+<body id='bkGround'>
+
+<div data-role="page" id='mainPage'>
+  <div data-role='content'>
+  <section class="container">
+    <div id="carousel">
+      <figure><img src='img/company_menu_icon.png' alt=''></figure>
+      <figure><img src='img/customers_menu_icon.png' alt=''></figure>
+      <figure><img src='img/products_menu_icon.jpg' alt=''></figure>
+      <figure><img src='img/suppliers_menu_icon.png' alt=''></figure>
+      <figure><img src='img/financials_menu_icon.png' alt=''></figure>
+      <figure><img src='img/customers_menu_icon.png' alt=''></figure>
+      <figure><img src='img/products_menu_icon.jpg' alt=''></figure>
+      <figure><img src='img/suppliers_menu_icon.png' alt=''></figure>
+      <figure><img src='img/financials_menu_icon.png' alt=''></figure>
+    </div>
+  </section>
+
+
+      <div  id='graph'>
+         <div id="chartdiv" style="height:300px;width:450px; ">
+         </div>
+         <div id="chartBubble" style="height:300px;width:450px; ">
+         </div>
+      </div>
+
+  </div>
+    <script>
+      /*  THIS WILL NOT WORK - NEEDS TO BE IN A JS - SEE pageLoadInit.js
+        $('mainPage').on('pageshow',function() {
+ 		 alert( 'This page was loaded into the dom' );
+                 $.jqplot('chartdiv',  [[[1, 2],[3,5.12],[5,13.1],[7,33.6],[9,85.9],[11,219.9]]]);
+        });
+        */
+       //alert('runs in page');   //this runs before pageshow as soon as this code is hit !
+    </script>
+</div>   <!-- end div page -->
+
+
+
+<script src="phonegap.js"></script>
+</body>
+</html>
